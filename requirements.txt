@@ -3,6 +3,5 @@ torch
 torchvision
 pillow
 numpy
-opencv-python-headless
 plotly
-sqlite3
+opencv-python-headless
