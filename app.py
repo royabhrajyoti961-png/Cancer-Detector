@@ -2,11 +2,10 @@ import streamlit as st
 import torch
 import torch.nn as nn
 from torchvision import models, transforms
-from PIL import Image, ImageOps
+from PIL import Image
 import plotly.graph_objects as go
 import time
 import datetime
-import pandas as pd
 
 # --- 1. CORE SYSTEM CONFIGURATION ---
 st.set_page_config(
@@ -16,73 +15,82 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. THE "FINEST" MEDICAL UI (CSS) ---
+# --- 2. LIGHT DYNAMIC MEDICAL UI ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;500&display=swap');
 
-    /* Dynamic Deep Space Gradient */
+    /* Animated Light Gradient Background */
     [data-testid="stAppViewContainer"] {
-        background: radial-gradient(circle at center, #001a1d 0%, #00080a 100%);
-        background-attachment: fixed;
-        color: #00d4ff;
+        background: linear-gradient(-45deg, #e6f7ff, #f0fbff, #ffffff, #e0f7fa);
+        background-size: 400% 400%;
+        animation: gradientFlow 12s ease infinite;
         font-family: 'JetBrains Mono', monospace;
+        color: #003344;
     }
 
-    /* Professional Glassmorphism Card */
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Glass Card (Light Mode) */
     .med-card {
-        background: rgba(0, 30, 40, 0.4);
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(0, 212, 255, 0.2);
-        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 150, 200, 0.2);
+        border-radius: 14px;
         padding: 25px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
         margin-bottom: 20px;
     }
 
-    /* Clinical Typography */
+    /* Header */
     .clinical-header {
         font-family: 'Orbitron', sans-serif;
-        color: #00d4ff;
+        color: #0077b6;
         text-transform: uppercase;
-        letter-spacing: 3px;
-        border-left: 4px solid #00ff41;
-        padding-left: 15px;
+        letter-spacing: 2px;
+        border-left: 5px solid #00b4d8;
+        padding-left: 12px;
         margin-bottom: 20px;
     }
 
-    /* Animated Cyber Scan Overlay */
+    /* Scan Box */
     .scan-box {
         position: relative;
-        border: 1px solid #00d4ff;
+        border: 2px solid #00b4d8;
+        border-radius: 10px;
         overflow: hidden;
     }
+
     .scan-line {
         position: absolute;
         width: 100%;
-        height: 2px;
-        background: #00ff41;
-        box-shadow: 0 0 15px #00ff41;
-        animation: laser 2.5s infinite linear;
+        height: 3px;
+        background: #00b4d8;
+        box-shadow: 0 0 10px #00b4d8;
+        animation: laser 2s infinite linear;
         z-index: 10;
     }
+
     @keyframes laser {
         0% { top: 0%; opacity: 0; }
         50% { opacity: 1; }
         100% { top: 100%; opacity: 0; }
     }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 10px; }
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #00b4d8; border-radius: 10px; }
 
-    /* Hide unnecessary UI */
     header {visibility: hidden;}
     footer {visibility: hidden;}
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# --- 3. NEURAL ENGINE (BACKEND) ---
+# --- 3. MODEL ---
 @st.cache_resource
 def init_neural_engine():
     try:
@@ -102,43 +110,43 @@ def preprocess_tensor(img):
     ])
     return pipeline(img).unsqueeze(0)
 
-# --- 4. SIDEBAR CONTROL UNIT ---
+# --- SIDEBAR ---
 with st.sidebar:
-    st.markdown("<h2 style='font-family:Orbitron; color:#00ff41;'>✚ CONTROL</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color:#0077b6;'>✚ CONTROL</h2>", unsafe_allow_html=True)
     st.divider()
+
     scan_mode = st.radio("SENSITIVITY MODE", ["Standard", "High Precision", "Clinical Research"])
+
     st.markdown("---")
     st.subheader("SYSTEM VITALS")
     st.write(f"GPU: {'READY' if torch.cuda.is_available() else 'EMULATED'}")
     st.write(f"LATENCY: 42ms")
     st.progress(85, text="NEURAL LOAD")
-    
+
     if st.button("REBOOT SYSTEM"):
         st.rerun()
 
-# --- 5. MAIN INTERFACE ---
+# --- MAIN ---
 engine = init_neural_engine()
 
-# Global Header
 c1, c2, c3 = st.columns([3, 1, 1])
 with c1:
     st.markdown("<h1 class='clinical-header'>DERMA-LOGIC // DIAGNOSTIC TERMINAL</h1>", unsafe_allow_html=True)
 with c2:
     st.metric("PULSE", "72 BPM", delta="Stable")
 with c3:
-    st.write(f"**LOGGED:** DR. ABHRAJYOTI\n**NODE:** {datetime.datetime.now().strftime('%H:%M:%S')}")
+    st.write(f"**DR. ABHRAJYOTI**  \n{datetime.datetime.now().strftime('%H:%M:%S')}")
 
 st.divider()
 
-# Grid Layout
 left_panel, right_panel = st.columns([1, 1.4])
 
+# --- LEFT PANEL ---
 with left_panel:
     st.markdown('<div class="med-card">', unsafe_allow_html=True)
-    st.markdown("<p style='color:#00ff41;'>[SENSORS: ACTIVE]</p>", unsafe_allow_html=True)
-    
-    upload = st.file_uploader("DROP SCAN FILE", type=['png', 'jpg', 'jpeg'], label_visibility="collapsed")
-    
+
+    upload = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg'])
+
     if upload:
         img_raw = Image.open(upload).convert('RGB')
         st.markdown('<div class="scan-box">', unsafe_allow_html=True)
@@ -146,65 +154,53 @@ with left_panel:
         st.image(img_raw, use_column_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
     else:
-        st.markdown("<div style='height:300px; border:1px dashed #00d4ff; display:flex; align-items:center; justify-content:center;'>AWAITING INPUT</div>", unsafe_allow_html=True)
+        st.info("Awaiting image input")
+
     st.markdown('</div>', unsafe_allow_html=True)
 
+# --- RIGHT PANEL ---
 with right_panel:
     st.markdown('<div class="med-card">', unsafe_allow_html=True)
-    st.markdown("<p style='color:#00ff41;'>[DIAGNOSTICS: STANDBY]</p>", unsafe_allow_html=True)
-    
+
     if upload and engine:
-        with st.spinner("QUANTIZING PIXELS..."):
-            time.sleep(1) # Visual effect
-            
-            # Prediction
+        with st.spinner("Analyzing..."):
+            time.sleep(1)
+
             tensor = preprocess_tensor(img_raw)
             with torch.no_grad():
                 logits = engine(tensor)
                 probs = torch.nn.functional.softmax(logits, dim=1)
                 risk = probs[0][1].item() * 100
 
-            # Visualization
             fig = go.Figure(go.Indicator(
                 mode="gauge+number",
                 value=risk,
-                number={'suffix': "%", 'font': {'color': '#00d4ff', 'size': 50}},
+                number={'suffix': "%"},
                 gauge={
-                    'axis': {'range': [0, 100], 'tickcolor': "#00d4ff"},
-                    'bar': {'color': "#ff004c" if risk > 50 else "#00ff41"},
-                    'bgcolor': "rgba(0,0,0,0)",
-                    'borderwidth': 1,
-                    'bordercolor': "#00d4ff",
-                    'steps': [
-                        {'range': [0, 35], 'color': 'rgba(0, 255, 65, 0.05)'},
-                        {'range': [35, 75], 'color': 'rgba(255, 165, 0, 0.05)'},
-                        {'range': [75, 100], 'color': 'rgba(255, 0, 76, 0.05)'}
-                    ]
+                    'axis': {'range': [0, 100]},
+                    'bar': {'color': "#0077b6"},
                 }
             ))
-            fig.update_layout(height=280, margin=dict(t=10, b=10), paper_bgcolor='rgba(0,0,0,0)')
+
+            fig.update_layout(height=250)
             st.plotly_chart(fig, use_container_width=True)
 
-            # Report Logic
             st.markdown("---")
-            if risk > 65:
-                st.markdown("<h3 style='color:#ff004c;'>❗ CRITICAL FINDINGS</h3>", unsafe_allow_html=True)
-                st.write("Pattern recognition detects high confidence in cellular atypia. Immediate dermoscopic evaluation requested.")
-            elif risk > 35:
-                st.markdown("<h3 style='color:orange;'>⚠️ MODERATE OBSERVATION</h3>", unsafe_allow_html=True)
-                st.write("Anomalous patterns detected. Monitor lesion for changes in ABCDE criteria.")
-            else:
-                st.markdown("<h3 style='color:#00ff41;'>✅ CLEAR SCAN</h3>", unsafe_allow_html=True)
-                st.write("No malignant markers identified by Neural Engine v4.5.")
 
-            # Clinical Export
-            st.markdown("<br>", unsafe_allow_html=True)
-            report_data = f"DERMA-LOGIC REPORT\nDate: {datetime.date.today()}\nRisk: {risk:.2f}%\nStatus: {'MALIGNANT' if risk > 50 else 'BENIGN'}"
-            st.download_button("GENERATE CLINICAL REPORT", data=report_data, file_name=f"Report_{datetime.date.today()}.txt")
+            if risk > 65:
+                st.error("❗ High Risk Detected")
+            elif risk > 35:
+                st.warning("⚠️ Moderate Risk")
+            else:
+                st.success("✅ Low Risk")
+
+            report_data = f"Date: {datetime.date.today()}\nRisk: {risk:.2f}%"
+            st.download_button("Download Report", data=report_data, file_name="report.txt")
 
     else:
-        st.info("System Ready. Please feed medical imaging data into the sensor unit.")
+        st.info("Upload image to start analysis")
+
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- 6. LOGS ---
-st.markdown("<p style='font-size:10px; color:rgba(0,212,255,0.3);'>► ENCRYPTION_SHA256: 4F88A... // BUFFER_SIZE: 1024KB // ENGINE: RESNET18_PYTORCH</p>", unsafe_allow_html=True)
+# --- FOOTER ---
+st.caption("DERMA-LOGIC v4.5 | Light Medical Interface")
