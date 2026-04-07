@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import datetime
 import time
 
-# SAFE CV2 IMPORT (IMPORTANT FIX)
+# SAFE CV2 IMPORT
 try:
     import cv2
     CV2_AVAILABLE = True
@@ -18,18 +18,13 @@ except:
 # --- CONFIG ---
 st.set_page_config(page_title="DermaLogic AI", page_icon="🏥", layout="wide")
 
-# --- FIXED POPPINS UI ---
+# --- UI (POPPINS + CLEAN HOSPITAL STYLE) ---
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-/* FORCE FONT EVERYWHERE */
+/* FORCE FONT */
 html, body, [class*="css"], * {
-    font-family: 'Poppins', sans-serif !important;
-}
-
-/* Sidebar also */
-[data-testid="stSidebar"] * {
     font-family: 'Poppins', sans-serif !important;
 }
 
@@ -40,9 +35,9 @@ html, body, [class*="css"], * {
 
 /* Card */
 .med-card {
-    background: #ffffff;
+    background: white;
     border-radius: 14px;
-    padding: 22px;
+    padding: 20px;
     border: 1px solid #e6edf5;
     box-shadow: 0 6px 18px rgba(0,0,0,0.06);
     margin-bottom: 20px;
@@ -63,13 +58,22 @@ html, body, [class*="css"], * {
     margin-bottom: 10px;
 }
 
-/* Upload box */
-.upload-box {
+/* File uploader fix */
+[data-testid="stFileUploader"] {
     border: 2px dashed #c5d9e8;
-    padding: 40px;
-    text-align: center;
+    padding: 20px;
     border-radius: 10px;
-    color: #7a9bb5;
+    background-color: #f9fcff;
+}
+
+[data-testid="stFileUploader"] button {
+    background-color: #1b4965;
+    color: white;
+    border-radius: 8px;
+}
+
+[data-testid="stFileUploader"] label {
+    display: none;
 }
 
 /* Status */
@@ -102,7 +106,7 @@ def preprocess(img):
     ])
     return transform(img).unsqueeze(0)
 
-# --- SAFE HEATMAP ---
+# --- HEATMAP ---
 def generate_heatmap(model, image):
     if not CV2_AVAILABLE:
         return None
@@ -140,18 +144,14 @@ def generate_heatmap(model, image):
         cam += w * fmap[i]
 
     cam = np.maximum(cam, 0)
-    cam = cv2.resize(cam, (224,224))
     cam = cam / cam.max()
 
+    import cv2
+    cam = cv2.resize(cam, (224,224))
     heatmap = cv2.applyColorMap(np.uint8(255 * cam), cv2.COLORMAP_JET)
     original = cv2.resize(np.array(image), (224,224))
 
-    superimposed = cv2.addWeighted(original, 0.6, heatmap, 0.4, 0)
-
-    handle_f.remove()
-    handle_b.remove()
-
-    return superimposed
+    return cv2.addWeighted(original, 0.6, heatmap, 0.4, 0)
 
 # --- HEADER ---
 col1, col2 = st.columns([4,1])
@@ -170,13 +170,18 @@ with left:
     st.markdown("<div class='med-card'>", unsafe_allow_html=True)
     st.markdown("<div class='section-title'>Upload Patient Image</div>", unsafe_allow_html=True)
 
-    upload = st.file_uploader("Upload", type=['jpg','png','jpeg'])
+    upload = st.file_uploader(
+        "Upload Patient Image",
+        type=['jpg','png','jpeg'],
+        label_visibility="collapsed"
+    )
 
     if upload:
         image = Image.open(upload).convert("RGB")
         st.image(image, use_column_width=True)
+
     else:
-        st.markdown("<div class='upload-box'>Upload Skin Image</div>", unsafe_allow_html=True)
+        st.info("Drag & drop or upload image")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -186,7 +191,7 @@ with right:
     st.markdown("<div class='section-title'>AI Diagnosis</div>", unsafe_allow_html=True)
 
     if upload and model:
-        with st.spinner("Analyzing with AI..."):
+        with st.spinner("Analyzing..."):
             time.sleep(1)
 
             tensor = preprocess(image)
@@ -195,7 +200,6 @@ with right:
                 prob = torch.nn.functional.softmax(out, dim=1)
                 risk = prob[0][1].item() * 100
 
-        # Gauge
         fig = go.Figure(go.Indicator(
             mode="gauge+number",
             value=risk,
@@ -207,7 +211,6 @@ with right:
 
         st.markdown("---")
 
-        # Status
         if risk > 65:
             st.markdown("<p class='high'>High Risk</p>", unsafe_allow_html=True)
         elif risk > 35:
@@ -215,28 +218,19 @@ with right:
         else:
             st.markdown("<p class='low'>Low Risk</p>", unsafe_allow_html=True)
 
-        # Heatmap (SAFE)
         st.markdown("### 🔬 AI Heatmap Analysis")
         heatmap_img = generate_heatmap(model, image)
 
         if heatmap_img is not None:
-            st.image(heatmap_img, caption="Affected Area Highlight")
+            st.image(heatmap_img)
         else:
-            st.warning("Heatmap unavailable (cv2 not installed on server)")
+            st.warning("Heatmap unavailable (cv2 not installed)")
 
-        # Report
-        report = f"""
-DERMALOGIC AI REPORT
-Date: {datetime.date.today()}
-Risk Score: {risk:.2f}%
-
-Interpretation:
-{'High Risk - Immediate consultation required' if risk>65 else 'Moderate Risk - Monitor condition' if risk>35 else 'Low Risk'}
-"""
-        st.download_button("Download Clinical Report", report, "report.txt")
+        report = f"Date: {datetime.date.today()}\nRisk: {risk:.2f}%"
+        st.download_button("Download Report", report, "report.txt")
 
     else:
-        st.info("Upload image to begin analysis")
+        st.info("Upload image to begin")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
