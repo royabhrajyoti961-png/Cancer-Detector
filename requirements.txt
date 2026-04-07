@@ -1,6 +1,7 @@
 streamlit
 torch
 torchvision
-Pillow
+pillow
+numpy
+opencv-python-headless
 plotly
-pandas
