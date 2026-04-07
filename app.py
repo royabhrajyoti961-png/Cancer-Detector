@@ -4,21 +4,33 @@ import torch.nn as nn
 from torchvision import models, transforms
 from PIL import Image
 import numpy as np
-import cv2
 import plotly.graph_objects as go
 import datetime
 import time
 
+# SAFE CV2 IMPORT (IMPORTANT FIX)
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except:
+    CV2_AVAILABLE = False
+
 # --- CONFIG ---
 st.set_page_config(page_title="DermaLogic AI", page_icon="🏥", layout="wide")
 
-# --- POPPINS MEDICAL UI ---
+# --- FIXED POPPINS UI ---
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-html, body, [class*="css"] {
-    font-family: 'Poppins', sans-serif;
+/* FORCE FONT EVERYWHERE */
+html, body, [class*="css"], * {
+    font-family: 'Poppins', sans-serif !important;
+}
+
+/* Sidebar also */
+[data-testid="stSidebar"] * {
+    font-family: 'Poppins', sans-serif !important;
 }
 
 /* Background */
@@ -90,8 +102,11 @@ def preprocess(img):
     ])
     return transform(img).unsqueeze(0)
 
-# --- GRAD-CAM ---
+# --- SAFE HEATMAP ---
 def generate_heatmap(model, image):
+    if not CV2_AVAILABLE:
+        return None
+
     model.eval()
     img_tensor = preprocess(image)
     img_tensor.requires_grad = True
@@ -160,7 +175,6 @@ with left:
     if upload:
         image = Image.open(upload).convert("RGB")
         st.image(image, use_column_width=True)
-
     else:
         st.markdown("<div class='upload-box'>Upload Skin Image</div>", unsafe_allow_html=True)
 
@@ -201,10 +215,14 @@ with right:
         else:
             st.markdown("<p class='low'>Low Risk</p>", unsafe_allow_html=True)
 
-        # Heatmap
+        # Heatmap (SAFE)
         st.markdown("### 🔬 AI Heatmap Analysis")
         heatmap_img = generate_heatmap(model, image)
-        st.image(heatmap_img, caption="Affected Area Highlight")
+
+        if heatmap_img is not None:
+            st.image(heatmap_img, caption="Affected Area Highlight")
+        else:
+            st.warning("Heatmap unavailable (cv2 not installed on server)")
 
         # Report
         report = f"""
