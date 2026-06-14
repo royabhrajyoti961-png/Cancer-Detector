@@ -32,11 +32,9 @@ st.markdown("""
 html, body, [class*="css"], * {
     font-family: 'Poppins', sans-serif !important;
 }
-
 [data-testid="stAppViewContainer"] {
     background-color: #f4f8fb;
 }
-
 /* Card */
 .card {
     background: white;
@@ -46,21 +44,18 @@ html, body, [class*="css"], * {
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     margin-bottom: 20px;
 }
-
 /* Header */
 .header {
     font-size: 26px;
     font-weight: 600;
     color: #1f4e79;
 }
-
 /* Section */
 .title {
     font-size: 16px;
     font-weight: 600;
     color: #2a6f97;
 }
-
 /* Uploader Fix */
 [data-testid="stFileUploader"] {
     border: 2px dashed #bcd4e6;
@@ -71,14 +66,12 @@ html, body, [class*="css"], * {
 [data-testid="stFileUploader"] label {
     display: none;
 }
-
 /* Status */
 .low {color: green;}
 .mid {color: orange;}
 .high {color: red;}
 </style>
 """, unsafe_allow_html=True)
-
 # --- MODEL ---
 @st.cache_resource
 def load_model():
@@ -90,9 +83,7 @@ def load_model():
         return model
     except:
         return None
-
 model = load_model()
-
 def preprocess(img):
     transform = transforms.Compose([
         transforms.Resize((224,224)),
@@ -100,24 +91,18 @@ def preprocess(img):
         transforms.Normalize([0.485,0.456,0.406],[0.229,0.224,0.225])
     ])
     return transform(img).unsqueeze(0)
-
 # --- HEADER ---
 st.markdown("<div class='header'>🏥 DermaLogic Hospital AI System</div>", unsafe_allow_html=True)
 st.divider()
-
 # --- PATIENT FORM ---
 st.markdown("<div class='title'>Patient Details</div>", unsafe_allow_html=True)
-
 col1, col2, col3 = st.columns(3)
 name = col1.text_input("Name")
 age = col2.number_input("Age", 1, 120)
 gender = col3.selectbox("Gender", ["Male", "Female", "Other"])
-
 st.divider()
-
 # --- LAYOUT ---
 left, right = st.columns([1,1.2])
-
 # --- LEFT PANEL ---
 with left:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
