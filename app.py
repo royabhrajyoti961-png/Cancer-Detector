@@ -7,11 +7,9 @@ import plotly.graph_objects as go
 import sqlite3
 import datetime
 import time
-
 # --- DATABASE ---
 conn = sqlite3.connect("patients.db", check_same_thread=False)
 c = conn.cursor()
-
 c.execute("""
 CREATE TABLE IF NOT EXISTS records (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
