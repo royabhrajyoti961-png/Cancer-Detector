@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS records (
 conn.commit()
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="DermaLogic Hospital AI", page_icon="🏥", layout="wide")
-
 # --- UI (CLEAN + POPPINS) ---
 st.markdown("""
 <style>
@@ -112,19 +111,15 @@ with left:
         type=["jpg","png","jpeg"],
         label_visibility="collapsed"
     )
-
     if upload:
         image = Image.open(upload).convert("RGB")
         st.image(image, use_column_width=True)
     else:
         st.info("Upload patient skin image")
-
     st.markdown("</div>", unsafe_allow_html=True)
-
 # --- RIGHT PANEL ---
 with right:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
-
     if upload and model:
         if st.button("Run Diagnosis"):
             with st.spinner("Analyzing..."):
