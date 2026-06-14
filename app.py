@@ -139,7 +139,6 @@ with right:
             ))
             fig.update_layout(height=250)
             st.plotly_chart(fig, use_container_width=True)
-
             # Result
             if risk > 65:
                 st.markdown("<p class='high'>High Risk - Consult doctor</p>", unsafe_allow_html=True)
@@ -157,9 +156,7 @@ with right:
     st.markdown("</div>", unsafe_allow_html=True)
 # --- HISTORY ---
 st.markdown("## 📊 Patient History")
-
 search = st.text_input("Search patient")
-
 if search:
     data = c.execute("SELECT * FROM records WHERE name LIKE ?", ('%' + search + '%',)).fetchall()
 else:
