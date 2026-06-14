@@ -130,7 +130,6 @@ with right:
                     out = model(tensor)
                     prob = torch.nn.functional.softmax(out, dim=1)
                     risk = prob[0][1].item() * 100
-
             # Gauge
             fig = go.Figure(go.Indicator(
                 mode="gauge+number",
