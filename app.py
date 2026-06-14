@@ -147,19 +147,14 @@ with right:
                 st.markdown("<p class='mid'>Moderate Risk</p>", unsafe_allow_html=True)
             else:
                 st.markdown("<p class='low'>Low Risk</p>", unsafe_allow_html=True)
-
             # SAVE
             c.execute("INSERT INTO records (name, age, gender, date, risk) VALUES (?, ?, ?, ?, ?)",
-                      (name, age, gender, str(datetime.date.today()), risk))
+            (name, age, gender, str(datetime.date.today()), risk))
             conn.commit()
-
             st.success("Saved successfully")
-
     else:
         st.info("Upload image and fill patient details")
-
     st.markdown("</div>", unsafe_allow_html=True)
-
 # --- HISTORY ---
 st.markdown("## 📊 Patient History")
 
@@ -169,8 +164,6 @@ if search:
     data = c.execute("SELECT * FROM records WHERE name LIKE ?", ('%' + search + '%',)).fetchall()
 else:
     data = c.execute("SELECT * FROM records").fetchall()
-
 st.dataframe(data)
-
 # --- FOOTER ---
 st.caption("Hospital AI System • For educational use only")
