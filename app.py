@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS records (
 )
 """)
 conn.commit()
-
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="DermaLogic Hospital AI", page_icon="🏥", layout="wide")
 
